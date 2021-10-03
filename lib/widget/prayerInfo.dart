@@ -1,3 +1,5 @@
+// ignore_for_file: file_names, avoid_print
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_emoji/flutter_emoji.dart';
@@ -37,7 +39,7 @@ class _PrayerInfoState extends State<PrayerInfo> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         SelectableText(
-                          parser.emojify(prayers[i].title),
+                          "$i" + parser.emojify(prayers[i].title),
                           style: const TextStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
@@ -70,6 +72,7 @@ class _PrayerInfoState extends State<PrayerInfo> {
                         ),
                         const SizedBox(height: 20),
                         Wrap(
+                          spacing: 10,
                           children: [
                             ElevatedButton(
                               onPressed: () => {
@@ -80,11 +83,11 @@ class _PrayerInfoState extends State<PrayerInfo> {
                             ),
                             ElevatedButton(
                               onPressed: () => {
+                                Navigator.pop(context),
                                 setState(() {
-                                  prayers.removeAt(i);
+                                  prayers.remove(prayers[i]);
                                   saveData();
                                 }),
-                                Navigator.pop(context),
                               },
                               child: const Text("Remove"),
                             ),

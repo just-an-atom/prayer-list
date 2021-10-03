@@ -1,4 +1,4 @@
-import 'dart:convert';
+// ignore_for_file: avoid_print, prefer_const_constructors
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -68,7 +68,6 @@ saveData() async {
   }
 
   prefs.setStringList("prayers", prayersJson);
-  prayers.sort((a, b) => b.date.compareTo(a.date));
 }
 
 class _MyHomePageState extends State<MyHomePage> {
@@ -80,6 +79,10 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   getData() async {
+    print("Clearing old Data...");
+
+    prayers.clear();
+
     print("Getting data...");
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
@@ -93,23 +96,28 @@ class _MyHomePageState extends State<MyHomePage> {
 
         DateTime today = DateTime.now();
 
-        today = today.subtract(Duration(
-          hours: today.hour,
-          minutes: today.minute,
-          seconds: today.second,
-          milliseconds: today.millisecond,
-          microseconds: today.microsecond,
+        DateTime lastCheck = Convert().fromIntToDateTime(prayer.lastCheck);
+
+        lastCheck = lastCheck.subtract(Duration(
+          hours: lastCheck.hour,
+          minutes: lastCheck.minute,
+          seconds: lastCheck.second,
+          milliseconds: lastCheck.millisecond,
+          microseconds: lastCheck.microsecond,
         ));
 
-        // Check if it's the next day.
-        // If so allow the user to check off that prayer.
-        if (prayer.date < Convert().dateTimeToInt(today)) {
-          prayer.checked = false;
-        } else {
-          prayer.checked = true;
-        }
+        DateTime prayerAvailableTime = lastCheck.add(const Duration(days: 1));
+
+        print(prayerAvailableTime);
 
         setState(() {
+          // Check if it's the next day.
+          // If so allow the user to check off that prayer.
+          if (Convert().dateTimeToInt(today) >=
+              Convert().dateTimeToInt(prayerAvailableTime)) {
+            prayer.checked = false;
+          }
+
           prayers.add(prayer);
 
           prayers.sort((a, b) => b.date.compareTo(a.date));
@@ -226,36 +234,90 @@ class _MyHomePageState extends State<MyHomePage> {
     }
 
     return Scaffold(
-      body: CustomScrollView(
-        slivers: [
-          SliverAppBar(
-            centerTitle: true,
-            title: Text(widget.title),
-            floating: true,
-          ),
-          prayers.isEmpty
-              ? SliverFillRemaining(
-                  child: Center(
-                    child: Text(
-                      "No prayers yet.",
-                      style: TextStyle(
-                        color: Colors.black.withOpacity(0.5),
-                      ),
-                    ),
-                  ),
-                )
-              : SliverList(
-                  delegate: SliverChildBuilderDelegate(
-                    (context, i) {
-                      return Column(
-                        children: [
-                          ListTile(
-                            onTap: () => setState(() {
-                              prayers[i].checked = !prayers[i].checked;
+      body: RefreshIndicator(
+        onRefresh: () async {
+          setState(() {
+            getData();
+          });
+        },
+        child: CustomScrollView(
+          slivers: [
+            SliverAppBar(
+              pinned: true,
+              expandedHeight: 250,
+              flexibleSpace: FlexibleSpaceBar(
+                background: Image.network(
+                  "https://pixabay.com/get/g275ca887738e3b690590f9338c8e2650a6bd2b2be93a7d3875a4de87488f4cd56f24bd8e9185563332b604555e9b8f808dde0dc28831242d2e429a1893b8c2193f560b96c0910c202b5a232a222a39fd_640.jpg",
+                  fit: BoxFit.fitWidth,
+                ),
+                title: Text(widget.title),
+                centerTitle: false,
+              ),
+            ),
+            SliverList(
+              delegate: SliverChildBuilderDelegate(
+                (context, i) {
+                  return Column(
+                    children: [
+                      ListTile(
+                        onTap: () => setState(() {
+                          prayers[i].checked = !prayers[i].checked;
+                          if (prayers[i].checked == true) {
+                            prayers[i].count++;
+
+                            prayers[i].previousCheck = prayers[i].lastCheck;
+
+                            prayers[i].lastCheck =
+                                Convert().dateTimeToInt(DateTime.now());
+                          } else {
+                            if (prayers[i].count > 0) {
+                              prayers[i].count--;
+                            }
+
+                            prayers[i].lastCheck = prayers[i].previousCheck;
+
+                            prayers[i].date =
+                                Convert().dateTimeToInt(DateTime.now());
+                          }
+                          saveData();
+                          HapticFeedback.vibrate();
+                        }),
+                        onLongPress: () => prayerInfo(context, prayers, i),
+                        title: Row(
+                          children: [
+                            Text(
+                              prayers[i].title.isEmpty
+                                  ? "Empty"
+                                  : parser.emojify(prayers[i].title),
+                              style: TextStyle(
+                                decoration: prayers[i].checked
+                                    ? TextDecoration.lineThrough
+                                    : TextDecoration.none,
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            prayers[i].count > 0
+                                ? Text("🔥 " + prayers[i].count.toString())
+                                : Container(),
+                          ],
+                        ),
+                        subtitle: Text(
+                          DateFormat.yMMMMEEEEd().format(Convert()
+                              .fromIntToDateTime(prayers[i].lastCheck)),
+                          style: TextStyle(
+                            decoration: prayers[i].checked
+                                ? TextDecoration.lineThrough
+                                : TextDecoration.none,
+                          ),
+                        ),
+                        trailing: Checkbox(
+                          value: prayers[i].checked,
+                          onChanged: (value) {
+                            setState(() {
+                              HapticFeedback.vibrate();
+                              prayers[i].checked = value!;
                               if (prayers[i].checked == true) {
                                 prayers[i].count++;
-
-                                prayers[i].previousCheck = prayers[i].lastCheck;
 
                                 prayers[i].lastCheck =
                                     Convert().dateTimeToInt(DateTime.now());
@@ -264,96 +326,29 @@ class _MyHomePageState extends State<MyHomePage> {
                                   prayers[i].count--;
                                 }
 
-                                prayers[i].lastCheck = prayers[i].previousCheck;
-
                                 prayers[i].date =
                                     Convert().dateTimeToInt(DateTime.now());
                               }
                               saveData();
-                              HapticFeedback.vibrate();
-                            }),
-                            onLongPress: () => prayerInfo(context, prayers, i),
-                            title: Row(
-                              children: [
-                                Text(
-                                  prayers[i].title.isEmpty
-                                      ? "Empty"
-                                      : parser.emojify(prayers[i].title),
-                                  style: TextStyle(
-                                    decoration: prayers[i].checked
-                                        ? TextDecoration.lineThrough
-                                        : TextDecoration.none,
-                                  ),
-                                ),
-                                const SizedBox(width: 10),
-                                prayers[i].count > 0
-                                    ? Text("🔥 " + prayers[i].count.toString())
-                                    : Container(),
-                              ],
-                            ),
-                            subtitle: prayers[i].description.isEmpty
-                                ? Text(
-                                    DateFormat.yMMMMEEEEd().format(Convert()
-                                        .fromIntToDateTime(
-                                            prayers[i].lastCheck)),
-                                    style: TextStyle(
-                                      decoration: prayers[i].checked
-                                          ? TextDecoration.lineThrough
-                                          : TextDecoration.none,
-                                    ),
-                                  )
-                                : Text(
-                                    prayers[i].description,
-                                    style: TextStyle(
-                                      decoration: prayers[i].checked
-                                          ? TextDecoration.lineThrough
-                                          : TextDecoration.none,
-                                    ),
-                                  ),
-                            trailing: Checkbox(
-                              value: prayers[i].checked,
-                              onChanged: (value) {
-                                setState(() {
-                                  HapticFeedback.vibrate();
-                                  prayers[i].checked = value!;
-                                  if (prayers[i].checked == true) {
-                                    prayers[i].count++;
-
-                                    prayers[i].lastCheck =
-                                        Convert().dateTimeToInt(DateTime.now());
-                                  } else {
-                                    if (prayers[i].count > 0) {
-                                      prayers[i].count--;
-                                    }
-
-                                    prayers[i].date =
-                                        Convert().dateTimeToInt(DateTime.now());
-                                  }
-                                  saveData();
-                                });
-                              },
-                            ),
-                          ),
-                          const Divider(),
-                        ],
-                      );
-                    },
-                    childCount: prayers.length,
-                  ),
-                )
-        ],
-      ),
-      floatingActionButton: Container(
-        decoration: BoxDecoration(
-          color: Theme.of(context).primaryColor,
-          borderRadius: BorderRadius.circular(100),
+                            });
+                          },
+                        ),
+                      ),
+                      const Divider(),
+                    ],
+                  );
+                },
+                childCount: prayers.length,
+              ),
+            )
+          ],
         ),
-        child: IconButton(
-          onPressed: () => newPrayer(context, prayers),
-          icon: const Icon(
-            Icons.add,
-            color: Colors.white,
-          ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => newPrayer(context, prayers),
+        child: const Icon(
+          Icons.add,
+          color: Colors.white,
         ),
       ),
     );
