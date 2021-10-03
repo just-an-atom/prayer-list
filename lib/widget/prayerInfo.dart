@@ -39,7 +39,7 @@ class _PrayerInfoState extends State<PrayerInfo> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         SelectableText(
-                          "$i" + parser.emojify(prayers[i].title),
+                          parser.emojify(prayers[i].title),
                           style: const TextStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
