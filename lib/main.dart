@@ -1,11 +1,14 @@
 // ignore_for_file: avoid_print, prefer_const_constructors
 
+import 'dart:convert';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_emoji/flutter_emoji.dart';
 import 'package:intl/intl.dart';
+import 'package:prayer_list/settings.dart';
 import 'package:prayer_list/widget/prayerInfo.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -90,7 +93,6 @@ class _MyHomePageState extends State<MyHomePage> {
     prayersJson = prefs.getStringList("prayers") ?? [];
 
     if (prayersJson != null || prayersJson.isNotEmpty) {
-      print("proc");
       for (var i = 0; i < prayersJson.length; i++) {
         Prayer prayer = Prayer.fromJson(prayersJson[i]);
 
@@ -162,29 +164,31 @@ class _MyHomePageState extends State<MyHomePage> {
                                 ),
                                 const SizedBox(height: 20),
                                 TextField(
+                                  style: TextStyle(fontSize: 16),
                                   controller: _noteInput,
                                   textCapitalization:
                                       TextCapitalization.sentences,
                                   minLines: 1,
                                   maxLines: 1,
                                   decoration: const InputDecoration(
-                                    hintText: "Enter prayer here...",
-                                    hintStyle: TextStyle(
-                                      fontSize: 14,
+                                    labelText: "Enter prayer here...",
+                                    labelStyle: TextStyle(
+                                      fontSize: 16,
                                     ),
                                   ),
                                 ),
                                 const SizedBox(height: 20),
                                 TextField(
+                                  style: TextStyle(fontSize: 14),
                                   controller: _descriptionInput,
                                   textCapitalization:
                                       TextCapitalization.sentences,
                                   minLines: 1,
                                   maxLines: null,
                                   decoration: const InputDecoration(
-                                    hintText: "Enter prayer description...",
-                                    hintStyle: TextStyle(
-                                      fontSize: 12,
+                                    labelText: "Enter prayer description...",
+                                    labelStyle: TextStyle(
+                                      fontSize: 14,
                                     ),
                                   ),
                                 ),
@@ -234,6 +238,23 @@ class _MyHomePageState extends State<MyHomePage> {
     }
 
     return Scaffold(
+      drawer: Drawer(
+        child: CustomScrollView(slivers: [
+          SliverList(
+            delegate: SliverChildListDelegate([
+              SizedBox(height: 50),
+              ListTile(
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => Settings()),
+                ),
+                leading: Icon(Icons.settings),
+                title: Text("Settings"),
+              ),
+            ]),
+          ),
+        ]),
+      ),
       body: RefreshIndicator(
         onRefresh: () async {
           setState(() {
@@ -248,7 +269,7 @@ class _MyHomePageState extends State<MyHomePage> {
               flexibleSpace: FlexibleSpaceBar(
                 background: Image.network(
                   "https://pixabay.com/get/g275ca887738e3b690590f9338c8e2650a6bd2b2be93a7d3875a4de87488f4cd56f24bd8e9185563332b604555e9b8f808dde0dc28831242d2e429a1893b8c2193f560b96c0910c202b5a232a222a39fd_640.jpg",
-                  fit: BoxFit.fitWidth,
+                  fit: BoxFit.cover,
                 ),
                 title: Text(widget.title),
                 centerTitle: false,
