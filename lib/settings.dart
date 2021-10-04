@@ -64,11 +64,15 @@ class _SettingsState extends State<Settings> {
                       ),
                     ),
                   ),
-                  ElevatedButton(
-                    onPressed: () => {
-                      importData(context),
-                    },
-                    child: Text("Import"),
+                  Row(
+                    children: [
+                      ElevatedButton(
+                        onPressed: () => {
+                          importData(context),
+                        },
+                        child: Text("Import"),
+                      ),
+                    ],
                   ),
                 ],
               ),

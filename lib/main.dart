@@ -81,6 +81,16 @@ class _MyHomePageState extends State<MyHomePage> {
     getData();
   }
 
+  removePrayer(BuildContext context, int i) {
+    Navigator.pop(context);
+
+    print("Removing: " + prayers[i].toString());
+    setState(() {
+      prayers.remove(prayers[i]);
+    });
+    saveData();
+  }
+
   getData() async {
     print("Clearing old Data...");
 
@@ -228,33 +238,17 @@ class _MyHomePageState extends State<MyHomePage> {
           });
     }
 
-    Future prayerInfo(BuildContext context, List<Prayer> prayers, int i) async {
+    prayerInfo(
+        BuildContext context, List<Prayer> prayers, int i, removePrayer) {
       showModalBottomSheet(
           isScrollControlled: true,
           context: context,
           builder: (BuildContext bc) {
-            return PrayerInfo(i);
+            return PrayerInfo(i, removePrayer);
           });
     }
 
     return Scaffold(
-      drawer: Drawer(
-        child: CustomScrollView(slivers: [
-          SliverList(
-            delegate: SliverChildListDelegate([
-              SizedBox(height: 50),
-              ListTile(
-                onTap: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => Settings()),
-                ),
-                leading: Icon(Icons.settings),
-                title: Text("Settings"),
-              ),
-            ]),
-          ),
-        ]),
-      ),
       body: RefreshIndicator(
         onRefresh: () async {
           setState(() {
@@ -264,11 +258,20 @@ class _MyHomePageState extends State<MyHomePage> {
         child: CustomScrollView(
           slivers: [
             SliverAppBar(
+              leading: IconButton(
+                onPressed: () => {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => Settings()),
+                  )
+                },
+                icon: Icon(Icons.settings),
+              ),
               pinned: true,
               expandedHeight: 250,
               flexibleSpace: FlexibleSpaceBar(
-                background: Image.network(
-                  "https://pixabay.com/get/g275ca887738e3b690590f9338c8e2650a6bd2b2be93a7d3875a4de87488f4cd56f24bd8e9185563332b604555e9b8f808dde0dc28831242d2e429a1893b8c2193f560b96c0910c202b5a232a222a39fd_640.jpg",
+                background: Image.asset(
+                  "./assets/header.jpg",
                   fit: BoxFit.cover,
                 ),
                 title: Text(widget.title),
@@ -303,7 +306,8 @@ class _MyHomePageState extends State<MyHomePage> {
                           saveData();
                           HapticFeedback.vibrate();
                         }),
-                        onLongPress: () => prayerInfo(context, prayers, i),
+                        onLongPress: () =>
+                            prayerInfo(context, prayers, i, removePrayer),
                         title: Row(
                           children: [
                             Text(

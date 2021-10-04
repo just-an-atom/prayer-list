@@ -9,9 +9,10 @@ import 'package:prayer_list/main.dart';
 import '../convert.dart';
 
 class PrayerInfo extends StatefulWidget {
-  const PrayerInfo(this.i);
+  const PrayerInfo(this.i, this.removePrayer);
 
-  final i;
+  final Function removePrayer;
+  final int i;
 
   @override
   State<PrayerInfo> createState() => _PrayerInfoState();
@@ -83,11 +84,7 @@ class _PrayerInfoState extends State<PrayerInfo> {
                             ),
                             ElevatedButton(
                               onPressed: () => {
-                                Navigator.pop(context),
-                                setState(() {
-                                  prayers.remove(prayers[i]);
-                                  saveData();
-                                }),
+                                widget.removePrayer(context, i),
                               },
                               child: const Text("Remove"),
                             ),
