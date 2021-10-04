@@ -3,6 +3,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_emoji/flutter_emoji.dart';
 import 'package:prayer_list/main.dart';
 import 'package:prayer_list/model/prayers.dart';
 
@@ -18,6 +19,29 @@ TextEditingController _importJson = TextEditingController();
 class _SettingsState extends State<Settings> {
   @override
   Widget build(BuildContext context) {
+    var parser = EmojiParser();
+
+    importData(BuildContext context) {
+      List<dynamic> jsonData = jsonDecode(_importJson.text) as List<dynamic>;
+      List<Prayer> tempPrayers = [];
+      prayers.clear();
+
+      for (var i = 0; i < jsonData.length; i++) {
+        Prayer prayer = Prayer.fromJson(jsonData[i]);
+
+        tempPrayers.add(prayer);
+      }
+
+      setState(() {
+        prayers = tempPrayers;
+      });
+      prayers.sort((a, b) => b.date.compareTo(a.date));
+
+      saveData();
+
+      Navigator.pop(context);
+    }
+
     return Scaffold(
       body: CustomScrollView(
         slivers: [
@@ -41,7 +65,9 @@ class _SettingsState extends State<Settings> {
                   Container(
                     padding: const EdgeInsets.all(10),
                     color: Colors.black.withOpacity(0.1),
-                    child: SelectableText(jsonEncode(prayers)),
+                    child: SelectableText(
+                      parser.unemojify(jsonEncode(prayers)),
+                    ),
                   ),
                   SizedBox(height: 20),
                   Row(
@@ -81,20 +107,5 @@ class _SettingsState extends State<Settings> {
         ],
       ),
     );
-  }
-}
-
-void importData(BuildContext context) {
-  List<dynamic> jsonData = jsonDecode(_importJson.text) as List<dynamic>;
-  prayers.clear();
-
-  for (var i = 0; i < jsonData.length; i++) {
-    Prayer prayer = Prayer.fromJson(jsonData[i]);
-
-    prayers.add(prayer);
-
-    prayers.sort((a, b) => b.date.compareTo(a.date));
-    saveData();
-    Navigator.pop(context);
   }
 }
