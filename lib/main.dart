@@ -1,8 +1,6 @@
 // ignore_for_file: avoid_print, prefer_const_constructors
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_emoji/flutter_emoji.dart';
 import 'package:intl/intl.dart';
@@ -14,6 +12,8 @@ import 'model/prayers.dart';
 import './convert.dart';
 
 List<Prayer> prayers = [];
+bool nerdyStats = false;
+double borderRad = 15;
 
 void main() {
   runApp(const MyApp());
@@ -145,91 +145,101 @@ class _MyHomePageState extends State<MyHomePage> {
       TextEditingController _descriptionInput = TextEditingController();
 
       showModalBottomSheet(
+          backgroundColor: Colors.transparent,
           isScrollControlled: true,
           context: context,
           builder: (BuildContext bc) {
             return Padding(
               padding: EdgeInsets.only(
                   bottom: MediaQuery.of(context).viewInsets.bottom),
-              child: SizedBox(
-                height: MediaQuery.of(context).size.height * .4,
-                child: CustomScrollView(
-                  slivers: [
-                    SliverList(
-                      delegate: SliverChildListDelegate(
-                        [
-                          Padding(
-                            padding: const EdgeInsets.all(20),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Text(
-                                  "New Prayer",
-                                  style: TextStyle(
-                                    fontSize: 24,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                const SizedBox(height: 20),
-                                TextField(
-                                  style: TextStyle(fontSize: 16),
-                                  controller: _noteInput,
-                                  textCapitalization:
-                                      TextCapitalization.sentences,
-                                  minLines: 1,
-                                  maxLines: 1,
-                                  decoration: const InputDecoration(
-                                    labelText: "Enter prayer here...",
-                                    labelStyle: TextStyle(
-                                      fontSize: 16,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(borderRad),
+                    topRight: Radius.circular(borderRad),
+                  ),
+                ),
+                child: SizedBox(
+                  height: MediaQuery.of(context).size.height * .5,
+                  child: CustomScrollView(
+                    slivers: [
+                      SliverList(
+                        delegate: SliverChildListDelegate(
+                          [
+                            Padding(
+                              padding: const EdgeInsets.all(20),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    "New Prayer",
+                                    style: TextStyle(
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.bold,
                                     ),
                                   ),
-                                ),
-                                const SizedBox(height: 20),
-                                TextField(
-                                  style: TextStyle(fontSize: 14),
-                                  controller: _descriptionInput,
-                                  textCapitalization:
-                                      TextCapitalization.sentences,
-                                  minLines: 1,
-                                  maxLines: null,
-                                  decoration: const InputDecoration(
-                                    labelText: "Enter prayer description...",
-                                    labelStyle: TextStyle(
-                                      fontSize: 14,
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(height: 20),
-                                ElevatedButton(
-                                  onPressed: () => {
-                                    prayers.add(
-                                      Prayer(
-                                        title: _noteInput.text,
-                                        description: _descriptionInput.text,
-                                        date: Convert()
-                                            .dateTimeToInt(DateTime.now()),
-                                        checked: false,
-                                        lastCheck: Convert()
-                                            .dateTimeToInt(DateTime.now()),
-                                        previousCheck: Convert()
-                                            .dateTimeToInt(DateTime.now()),
-                                        count: 0,
+                                  Divider(),
+                                  TextField(
+                                    style: TextStyle(fontSize: 16),
+                                    controller: _noteInput,
+                                    textCapitalization:
+                                        TextCapitalization.sentences,
+                                    minLines: 1,
+                                    maxLines: 1,
+                                    decoration: const InputDecoration(
+                                      labelText: "Enter prayer...",
+                                      labelStyle: TextStyle(
+                                        fontSize: 16,
                                       ),
                                     ),
-                                    Navigator.pop(context),
-                                    saveData(),
-                                    HapticFeedback.vibrate(),
-                                  },
-                                  child: const Text("Create"),
-                                ),
-                              ],
-                            ),
-                          )
-                        ],
+                                  ),
+                                  const SizedBox(height: 20),
+                                  TextField(
+                                    style: TextStyle(fontSize: 14),
+                                    controller: _descriptionInput,
+                                    textCapitalization:
+                                        TextCapitalization.sentences,
+                                    minLines: 1,
+                                    maxLines: null,
+                                    decoration: const InputDecoration(
+                                      labelText: "Add details...",
+                                      labelStyle: TextStyle(
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 20),
+                                  ElevatedButton(
+                                    onPressed: () => {
+                                      prayers.add(
+                                        Prayer(
+                                          title: _noteInput.text,
+                                          description: _descriptionInput.text,
+                                          date: Convert()
+                                              .dateTimeToInt(DateTime.now()),
+                                          checked: false,
+                                          lastCheck: Convert()
+                                              .dateTimeToInt(DateTime.now()),
+                                          previousCheck: Convert()
+                                              .dateTimeToInt(DateTime.now()),
+                                          count: 0,
+                                        ),
+                                      ),
+                                      Navigator.pop(context),
+                                      saveData(),
+                                      HapticFeedback.vibrate(),
+                                    },
+                                    child: const Text("Create"),
+                                  ),
+                                ],
+                              ),
+                            )
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             );
@@ -239,6 +249,7 @@ class _MyHomePageState extends State<MyHomePage> {
     prayerInfo(
         BuildContext context, List<Prayer> prayers, int i, removePrayer) {
       showModalBottomSheet(
+          backgroundColor: Colors.transparent,
           isScrollControlled: true,
           context: context,
           builder: (BuildContext bc) {
@@ -282,29 +293,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   return Column(
                     children: [
                       ListTile(
-                        onTap: () => setState(() {
-                          prayers[i].checked = !prayers[i].checked;
-                          if (prayers[i].checked == true) {
-                            prayers[i].count++;
-
-                            prayers[i].previousCheck = prayers[i].lastCheck;
-
-                            prayers[i].lastCheck =
-                                Convert().dateTimeToInt(DateTime.now());
-                          } else {
-                            if (prayers[i].count > 0) {
-                              prayers[i].count--;
-                            }
-
-                            prayers[i].lastCheck = prayers[i].previousCheck;
-
-                            prayers[i].date =
-                                Convert().dateTimeToInt(DateTime.now());
-                          }
-                          saveData();
-                          HapticFeedback.vibrate();
-                        }),
-                        onLongPress: () =>
+                        onTap: () =>
                             prayerInfo(context, prayers, i, removePrayer),
                         title: Row(
                           children: [

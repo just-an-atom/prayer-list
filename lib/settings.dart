@@ -1,4 +1,4 @@
-// ignore_for_file: prefer_const_constructors
+// ignore_for_file: prefer_const_constructors, use_key_in_widget_constructors
 
 import 'dart:convert';
 
@@ -100,6 +100,16 @@ class _SettingsState extends State<Settings> {
                       ),
                     ],
                   ),
+                  SwitchListTile(
+                    title: Text("Toggle Nerdy Stats"),
+                    subtitle: Text("If enabled shows extra stats"),
+                    value: nerdyStats,
+                    onChanged: (value) {
+                      setState(() {
+                        nerdyStats = value;
+                      });
+                    },
+                  )
                 ],
               ),
             ),
