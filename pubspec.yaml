@@ -30,9 +30,10 @@ dependencies:
   cupertino_icons: ^1.0.2
   flutter:
     sdk: flutter
-  intl: ^0.17.0
   flutter_emoji:
     git: https://github.com/cek-cek/flutter-emoji
+  intl: ^0.17.0
+  provider: ^6.0.2
   shared_preferences: ^2.0.8
 
 dev_dependencies:

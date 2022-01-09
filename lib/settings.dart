@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_emoji/flutter_emoji.dart';
 import 'package:prayer_list/main.dart';
 import 'package:prayer_list/model/prayers.dart';
+import 'package:prayer_list/screens/home_screen.dart';
 
 class Settings extends StatefulWidget {
   const Settings();
@@ -53,13 +54,11 @@ class _SettingsState extends State<Settings> {
               padding: const EdgeInsets.all(20),
               child: Column(
                 children: [
-                  Row(
-                    children: [
-                      Text(
-                        "Raw JSON Data",
-                        style: TextStyle(fontSize: 18),
-                      ),
-                    ],
+                  Text(
+                    "Raw JSON Data",
+                    style: TextStyle(
+                      fontSize: 18,
+                    ),
                   ),
                   SizedBox(height: 10),
                   Container(
@@ -70,13 +69,11 @@ class _SettingsState extends State<Settings> {
                     ),
                   ),
                   SizedBox(height: 20),
-                  Row(
-                    children: [
-                      Text(
-                        "Import JSON Data",
-                        style: TextStyle(fontSize: 18),
-                      ),
-                    ],
+                  Text(
+                    "Import JSON Data",
+                    style: TextStyle(
+                      fontSize: 18,
+                    ),
                   ),
                   TextField(
                     controller: _importJson,

@@ -1,10 +1,15 @@
-// ignore_for_file: file_names, avoid_print, use_key_in_widget_constructors
+// ignore_for_file: file_names, avoid_print, use_key_in_widget_constructors, prefer_const_constructors
+
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_emoji/flutter_emoji.dart';
 import 'package:intl/intl.dart';
 import 'package:prayer_list/main.dart';
+import 'package:prayer_list/providers/checkmark_provider.dart';
+import 'package:prayer_list/screens/home_screen.dart';
+import 'package:provider/src/provider.dart';
 
 import '../convert.dart';
 
@@ -74,28 +79,13 @@ class _PrayerInfoState extends State<PrayerInfo> {
                                 ],
                               ),
                               Checkbox(
-                                value: prayers[i].checked,
+                                value: context.watch<Checkmark>().check,
                                 onChanged: (value) {
                                   setState(() {
-                                    HapticFeedback.vibrate();
-                                    prayers[i].checked = value!;
-                                    if (prayers[i].checked == true) {
-                                      prayers[i].count++;
-
-                                      prayers[i].lastCheck = Convert()
-                                          .dateTimeToInt(DateTime.now());
-                                    } else {
-                                      if (prayers[i].count > 0) {
-                                        prayers[i].count--;
-                                      }
-
-                                      prayers[i].date = Convert()
-                                          .dateTimeToInt(DateTime.now());
-                                    }
-                                    saveData();
+                                    context.read<Checkmark>().checkToggle(i);
                                   });
                                 },
-                              )
+                              ),
                             ],
                           ),
                           const Divider(),
@@ -148,23 +138,25 @@ class _PrayerInfoState extends State<PrayerInfo> {
                                 ),
 
                           const SizedBox(height: 20),
-                          Wrap(
-                            spacing: 10,
-                            children: [
-                              ElevatedButton(
-                                onPressed: () => {
-                                  Navigator.pop(context),
-                                  HapticFeedback.vibrate(),
-                                },
-                                child: const Text("Done"),
+
+                          Center(
+                            child: TextButton(
+                              onPressed: () => {
+                                Navigator.pop(context),
+                                HapticFeedback.vibrate(),
+                              },
+                              child: const SizedBox(
+                                width: double.infinity,
+                                child: Center(
+                                  child: Text(
+                                    "Done",
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                ),
                               ),
-                              ElevatedButton(
-                                onPressed: () => {
-                                  widget.removePrayer(context, i),
-                                },
-                                child: const Text("Delete"),
-                              ),
-                            ],
+                            ),
                           ),
                         ],
                       ),
@@ -172,6 +164,37 @@ class _PrayerInfoState extends State<PrayerInfo> {
                   ],
                 ),
               ),
+              nerdyStats == true
+                  ? SliverList(
+                      delegate: SliverChildBuilderDelegate(
+                        (BuildContext context, int index) {
+                          return Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: [
+                              Text(
+                                Convert()
+                                    .fromIntToDateTime(
+                                        prayers[i].history[index].date)
+                                    .toString(),
+                              ),
+                              Text(
+                                prayers[i].history[index].count.toString(),
+                              ),
+                            ],
+                          );
+                        },
+                        childCount: prayers[i].history.length,
+                      ),
+                    )
+                  : SliverToBoxAdapter(),
+              prayers[i].history.isNotEmpty && nerdyStats == true
+                  ? SliverToBoxAdapter(
+                      child: TextButton(
+                        onPressed: () => prayers[i].history.clear(),
+                        child: Text("Clear history log"),
+                      ),
+                    )
+                  : SliverToBoxAdapter(),
             ],
           ),
         ),
